@@ -406,7 +406,7 @@ export class BaileysStartupService extends ChannelStartupService {
       qrcodeTerminal.generate(qr, { small: true }, (qrcode) =>
         this.logger.log(
           `\n{ instance: ${this.instance.name} pairingCode: ${this.instance.qrcode.pairingCode}, qrcodeCount: ${this.instance.qrcode.count} }\n` +
-            qrcode,
+          qrcode,
         ),
       );
 
@@ -999,16 +999,16 @@ export class BaileysStartupService extends ChannelStartupService {
 
         const messagesRepository: Set<string> = new Set(
           chatwootImport.getRepositoryMessagesCache(instance) ??
-            (
-              await this.prismaRepository.message.findMany({
-                select: { key: true },
-                where: { instanceId: this.instanceId },
-              })
-            ).map((message) => {
-              const key = message.key as { id: string };
+          (
+            await this.prismaRepository.message.findMany({
+              select: { key: true },
+              where: { instanceId: this.instanceId },
+            })
+          ).map((message) => {
+            const key = message.key as { id: string };
 
-              return key.id;
-            }),
+            return key.id;
+          }),
         );
 
         if (chatwootImport.getRepositoryMessagesCache(instance) === null) {
@@ -2399,11 +2399,7 @@ export class BaileysStartupService extends ChannelStartupService {
           mentionedJid: [],
           groupMentions: [],
           //expiration: 7776000,
-          ephemeralSettingTimestamp: {
-            low: Math.floor(Date.now() / 1000) - 172800,
-            high: 0,
-            unsigned: false,
-          },
+          ephemeralSettingTimestamp: Long.fromNumber(Math.floor(Date.now() / 1000) - 172800),
           disappearingMode: { initiator: 0 },
         };
         messageSent = await this.sendMessage(
@@ -2540,7 +2536,7 @@ export class BaileysStartupService extends ChannelStartupService {
         }
       }
 
-      this.logger.verbose(messageSent);
+      this.logger.verbose(`Message sent: key=${messageSent?.key?.id} remoteJid=${messageSent?.key?.remoteJid}`);
 
       this.sendDataWebhook(Events.SEND_MESSAGE, messageRaw);
 
